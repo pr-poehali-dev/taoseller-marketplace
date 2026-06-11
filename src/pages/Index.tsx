@@ -385,9 +385,6 @@ export default function Index() {
             {/* CATEGORIES */}
             <section className="max-w-6xl mx-auto px-6 pb-16">
               <div className="mb-7">
-                <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Oswald', sans-serif" }}>
-                  Популярные категории товаров
-                </h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {[
