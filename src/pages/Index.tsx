@@ -349,34 +349,46 @@ export default function Index() {
 
                   {/* Floating card — Taobao */}
                   <div
-                    className="absolute top-4 left-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5 shadow-lg float-anim"
+                    className="absolute top-4 left-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2 shadow-lg float-anim"
                     style={{ animationDelay: "0s", border: `1px solid ${BDR}` }}
                   >
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/TaoBao_logo.svg/200px-TaoBao_logo.svg.png" alt="Taobao" className="h-6 w-auto object-contain" />
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#ff5000" }}>
+                      <span className="text-white font-black text-xs" style={{ fontFamily: "'Righteous', cursive" }}>TB</span>
+                    </div>
+                    <span className="font-bold text-sm" style={{ color: "#ff5000", fontFamily: "'Righteous', cursive" }}>Taobao</span>
                   </div>
 
                   {/* Floating card — 1688 */}
                   <div
-                    className="absolute top-16 right-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5 shadow-lg float-anim"
+                    className="absolute top-16 right-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2 shadow-lg float-anim"
                     style={{ animationDelay: "0.4s", border: `1px solid ${BDR}` }}
                   >
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/1688.com_logo.svg/200px-1688.com_logo.svg.png" alt="1688" className="h-6 w-auto object-contain" />
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#e62b1e" }}>
+                      <span className="text-white font-black text-[10px]">阿里</span>
+                    </div>
+                    <span className="font-bold text-sm" style={{ color: "#e62b1e", fontFamily: "'Oswald', sans-serif" }}>1688</span>
                   </div>
 
                   {/* Floating card — Ozon */}
                   <div
-                    className="absolute bottom-16 left-2 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5 shadow-lg float-anim"
+                    className="absolute bottom-16 left-2 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2 shadow-lg float-anim"
                     style={{ animationDelay: "0.8s", border: `1px solid ${BDR}` }}
                   >
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ozon_logo.svg/200px-Ozon_logo.svg.png" alt="Ozon" className="h-5 w-auto object-contain" />
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#005bff" }}>
+                      <span className="text-white font-black text-xs">OZ</span>
+                    </div>
+                    <span className="font-bold text-sm" style={{ color: "#005bff", fontFamily: "'Righteous', cursive" }}>Ozon</span>
                   </div>
 
                   {/* Floating card — Wildberries */}
                   <div
-                    className="absolute bottom-8 right-0 bg-white rounded-2xl px-3 py-2.5 flex items-center shadow-lg float-anim"
+                    className="absolute bottom-6 right-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2 shadow-lg float-anim"
                     style={{ animationDelay: "1.2s", border: `1px solid ${BDR}` }}
                   >
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Wildberries_logo.svg/200px-Wildberries_logo.svg.png" alt="Wildberries" className="h-5 w-auto object-contain" />
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#cb11ab" }}>
+                      <span className="text-white font-black text-xs">WB</span>
+                    </div>
+                    <span className="font-bold text-sm" style={{ color: "#cb11ab", fontFamily: "'Righteous', cursive" }}>WB</span>
                   </div>
 
                   {/* Decorative dots */}
