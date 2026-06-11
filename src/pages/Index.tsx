@@ -134,10 +134,13 @@ export default function Index() {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
           {/* Logo */}
-          <button onClick={() => handleNav("home")} className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center gradient-brand shadow-sm">
-              <span className="text-white font-bold text-base" style={{ fontFamily: "'Oswald', sans-serif" }}>T</span>
-            </div>
+          <button onClick={() => handleNav("home")} className="flex items-center gap-1.5">
+            <img
+              src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/3928216f-85fe-4a28-b430-43bc1fa45224.jpg"
+              alt="TaoSeller mascot"
+              className="w-11 h-11 object-contain"
+              style={{ mixBlendMode: "multiply" }}
+            />
             <span className="font-bold text-gray-900 text-xl" style={{ fontFamily: "'Oswald', sans-serif" }}>
               TaoSeller<span style={{ color: P }}>.</span>
             </span>
@@ -754,10 +757,13 @@ export default function Index() {
       {/* FOOTER */}
       <footer className="border-t py-8 mt-4" style={{ borderColor: BDR }}>
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm" style={{ fontFamily: "'Oswald', sans-serif" }}>T</span>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <img
+              src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/3928216f-85fe-4a28-b430-43bc1fa45224.jpg"
+              alt="TaoSeller mascot"
+              className="w-9 h-9 object-contain"
+              style={{ mixBlendMode: "multiply" }}
+            />
             <span className="font-bold text-gray-700" style={{ fontFamily: "'Oswald', sans-serif" }}>TaoSeller.</span>
           </div>
           <div className="flex items-center gap-6">
