@@ -141,7 +141,8 @@ export default function Index() {
             <img
               src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/b73ece42-1e93-4ca9-a6dc-72bd1dd56b9d.png"
               alt="TaoSeller logo"
-              className="w-10 h-10 object-contain"
+              className="w-12 h-12 object-contain"
+              style={{ mixBlendMode: "multiply" }}
             />
             <span className="text-xl tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#c2410c" }}>
               Tao<span style={{ color: "#f97316" }}>Seller</span>
