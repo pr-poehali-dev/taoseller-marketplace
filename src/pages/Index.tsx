@@ -405,7 +405,7 @@ export default function Index() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {[
-                  { label: "UI/UX дизайн", icon: "Palette", grad: "gradient-pink", sub: "Товары для дизайнеров" },
+                  { label: "Taobao", icon: "ShoppingBag", grad: "gradient-brand", sub: "Обзор платформы" },
                   { label: "Электроника", icon: "Cpu", grad: "gradient-purple", sub: "Гаджеты и техника" },
                   { label: "Маркетинг", icon: "Megaphone", grad: "gradient-cyan", sub: "Реклама и продвижение" },
                   { label: "Одежда", icon: "Shirt", grad: "gradient-amber", sub: "Мода и стиль" },
