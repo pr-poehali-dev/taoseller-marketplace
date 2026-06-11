@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import OrderForm, { type OrderFormData } from "@/components/OrderForm";
 
@@ -71,6 +72,7 @@ const SURF = "#fff8f4";
 const BDR = "#fde8d8";
 
 export default function Index() {
+  const navigate = useNavigate();
   const [section, setSection] = useState<Section>("home");
   const [catFilter, setCatFilter] = useState("Все");
   const [orderFilter, setOrderFilter] = useState("Все");
@@ -405,7 +407,7 @@ export default function Index() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {[
-                  { label: "Taobao", icon: "ShoppingBag", grad: "gradient-brand", sub: "Обзор платформы" },
+                  { label: "Taobao", icon: "ShoppingBag", grad: "gradient-brand", sub: "Обзор платформы", link: "/taobao" },
                   { label: "Электроника", icon: "Cpu", grad: "gradient-purple", sub: "Гаджеты и техника" },
                   { label: "Маркетинг", icon: "Megaphone", grad: "gradient-cyan", sub: "Реклама и продвижение" },
                   { label: "Одежда", icon: "Shirt", grad: "gradient-amber", sub: "Мода и стиль" },
@@ -413,7 +415,7 @@ export default function Index() {
                 ].map((c, i) => (
                   <button
                     key={i}
-                    onClick={() => { setCatFilter(c.isMore ? "Все" : c.label); setSection("catalog"); }}
+                    onClick={() => { if (c.link) { navigate(c.link); return; } setCatFilter(c.isMore ? "Все" : c.label); setSection("catalog"); }}
                     className={`group transition-all rounded-3xl text-left ${c.isMore ? "flex flex-col items-center justify-center gap-3 hover:scale-105" : "hover:scale-105"}`}
                     style={c.isMore
                       ? { background: "#f0ebff", border: `1.5px dashed ${P}`, padding: "2rem 1rem" }
