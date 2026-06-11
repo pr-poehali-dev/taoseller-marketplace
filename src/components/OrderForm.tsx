@@ -15,6 +15,9 @@ export interface OrderFormData {
   address: string;
   comment: string;
   photo: string | null;
+  priceYuan: number | null;
+  priceRub: number | null;
+  totalRub: number | null;
 }
 
 const CNY_TO_RUB = 13.2;
@@ -76,7 +79,12 @@ export default function OrderForm({ onClose, onSubmit }: OrderFormProps) {
     if (!name.trim() || !phone.trim() || !address.trim()) return;
     setSubmitted(true);
     setTimeout(() => {
-      onSubmit({ link, quantity, variant, name, phone, address, comment, photo });
+      onSubmit({
+        link, quantity, variant, name, phone, address, comment, photo,
+        priceYuan: priceYuan,
+        priceRub: priceYuan ? Math.round(priceYuan * CNY_TO_RUB) : null,
+        totalRub: total,
+      });
     }, 1500);
   };
 

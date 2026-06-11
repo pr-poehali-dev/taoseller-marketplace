@@ -2,6 +2,26 @@ import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 import OrderForm, { type OrderFormData } from "@/components/OrderForm";
 
+const ORDERS_API = "https://functions.poehali.dev/285ad74b-7b60-4123-b852-f28f47f01e9e";
+
+interface DbOrder {
+  id: number;
+  order_num: string;
+  buyer_name: string;
+  buyer_phone: string;
+  address: string;
+  link: string;
+  quantity: number;
+  variant: string;
+  comment: string;
+  photo: string | null;
+  price_yuan: number | null;
+  price_rub: number | null;
+  total_rub: number | null;
+  status: string;
+  created_at: string;
+}
+
 type Page = "home" | "catalog" | "orders" | "storage" | "profile" | "help";
 
 interface Notification {
@@ -58,8 +78,23 @@ export default function Index() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showOrderForm, setShowOrderForm] = useState(false);
+  const [dbOrders, setDbOrders] = useState<DbOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const loadOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await fetch(ORDERS_API);
+      const data = await res.json();
+      setDbOrders(data.orders || []);
+    } catch {
+      // молча
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -69,6 +104,10 @@ export default function Index() {
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,14 +135,28 @@ export default function Index() {
     return matchCat && matchSearch;
   });
 
-  const filteredOrders = MOCK_ORDERS.filter((o) => {
+  const allOrders = dbOrders.length > 0
+    ? dbOrders.map((o) => ({
+        id: o.order_num,
+        buyer: o.buyer_name,
+        items: o.quantity,
+        total: o.total_rub ? `${o.total_rub.toLocaleString("ru")} ₽` : `¥ ${o.price_yuan ?? "—"}`,
+        status: o.status,
+        date: new Date(o.created_at).toLocaleDateString("ru", { day: "numeric", month: "short", year: "numeric" }),
+        address: o.address,
+      }))
+    : MOCK_ORDERS;
+
+  const filteredOrders = allOrders.filter((o) => {
     return orderStatusFilter === "Все" || o.status === orderStatusFilter;
   });
+
+  const newOrdersCount = allOrders.filter((o) => o.status === "new").length;
 
   const navItems: { id: Page; icon: string; label: string; badge?: number }[] = [
     { id: "home", icon: "LayoutDashboard", label: "Главная" },
     { id: "catalog", icon: "Package", label: "Каталог", badge: MOCK_PRODUCTS.length },
-    { id: "orders", icon: "ShoppingCart", label: "Заказы", badge: MOCK_ORDERS.filter((o) => o.status === "new").length },
+    { id: "orders", icon: "ShoppingCart", label: "Заказы", badge: newOrdersCount || undefined },
     { id: "storage", icon: "Warehouse", label: "Склад" },
     { id: "profile", icon: "UserCircle", label: "Профиль" },
     { id: "help", icon: "LifeBuoy", label: "Помощь" },
@@ -525,6 +578,14 @@ export default function Index() {
                     Экспорт
                   </button>
                   <button
+                    onClick={loadOrders}
+                    disabled={ordersLoading}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-all disabled:opacity-50"
+                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
+                  >
+                    <Icon name={ordersLoading ? "Loader" : "RefreshCw"} size={13} className={ordersLoading ? "animate-spin" : ""} />
+                  </button>
+                  <button
                     onClick={() => setShowOrderForm(true)}
                     className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90 transition-opacity"
                   >
@@ -585,6 +646,25 @@ export default function Index() {
                     })}
                   </tbody>
                 </table>
+                {ordersLoading && (
+                  <div className="flex items-center justify-center py-10 gap-2 text-gray-500 text-sm">
+                    <Icon name="Loader" size={16} className="animate-spin" />
+                    Загружаю заказы...
+                  </div>
+                )}
+                {!ordersLoading && filteredOrders.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-14 text-gray-500">
+                    <Icon name="ShoppingCart" size={36} className="mb-3 opacity-30" />
+                    <div className="text-sm mb-3">Заказов пока нет</div>
+                    <button
+                      onClick={() => setShowOrderForm(true)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90"
+                    >
+                      <Icon name="Plus" size={13} />
+                      Создать первый заказ
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -890,19 +970,31 @@ export default function Index() {
       {showOrderForm && (
         <OrderForm
           onClose={() => setShowOrderForm(false)}
-          onSubmit={(data: OrderFormData) => {
-            const newOrder = {
-              id: `TAO-${8823 + Math.floor(Math.random() * 100)}`,
-              buyer: data.name,
-              items: data.quantity,
-              total: `¥ ${data.quantity * 120}`,
-              status: "new" as const,
-              date: new Date().toLocaleDateString("ru", { day: "numeric", month: "short", year: "numeric" }),
-              address: data.address,
-            };
-            MOCK_ORDERS.unshift(newOrder);
+          onSubmit={async (data: OrderFormData) => {
+            try {
+              await fetch(ORDERS_API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  buyer_name: data.name,
+                  buyer_phone: data.phone,
+                  address: data.address,
+                  link: data.link,
+                  quantity: data.quantity,
+                  variant: data.variant,
+                  comment: data.comment,
+                  photo: data.photo,
+                  price_yuan: data.priceYuan,
+                  price_rub: data.priceRub,
+                  total_rub: data.totalRub,
+                }),
+              });
+              await loadOrders();
+              showToast(`Заказ от ${data.name} сохранён!`);
+            } catch {
+              showToast("Ошибка при сохранении заказа");
+            }
             setShowOrderForm(false);
-            showToast(`Заказ от ${data.name} оформлен!`);
           }}
         />
       )}
