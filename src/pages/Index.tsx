@@ -65,9 +65,9 @@ const PROD_STATUS = {
   out: { label: "Нет", cls: "text-red-500 bg-red-50" },
 };
 
-const P = "#7c5cbf";
-const SURF = "#f8f9fc";
-const BDR = "#e8ecf4";
+const P = "#f97316";
+const SURF = "#fff8f4";
+const BDR = "#fde8d8";
 
 export default function Index() {
   const [section, setSection] = useState<Section>("home");
@@ -141,8 +141,8 @@ export default function Index() {
               className="w-11 h-11 object-contain"
               style={{ mixBlendMode: "multiply" }}
             />
-            <span className="text-xl tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#1a1a2e" }}>
-              Tao<span style={{ color: P }}>Seller</span>
+            <span className="text-xl tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#c2410c" }}>
+              Tao<span style={{ color: "#f97316" }}>Seller</span>
             </span>
           </button>
 
@@ -764,7 +764,7 @@ export default function Index() {
               className="w-9 h-9 object-contain"
               style={{ mixBlendMode: "multiply" }}
             />
-            <span className="tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#1a1a2e" }}>Tao<span style={{ color: P }}>Seller</span></span>
+            <span className="tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#c2410c" }}>Tao<span style={{ color: "#f97316" }}>Seller</span></span>
           </div>
           <div className="flex items-center gap-6">
             {navLinks.map((n) => (
