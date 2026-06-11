@@ -38,7 +38,7 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   { id: 2, type: "message", title: "Сообщение от покупателя", text: "Ли Вэй: Когда будет отправка?", time: "15 мин", read: false },
   { id: 3, type: "change", title: "Изменение статуса", text: "Заказ #TAO-8815 доставлен", time: "1 ч", read: false },
   { id: 4, type: "order", title: "Новый заказ!", text: "Заказ #TAO-8820 на сумму ¥580", time: "2 ч", read: true },
-  { id: 5, type: "message", title: "Отзыв покупателя", text: "Чжан Вэй: ★★★★★ Отличный товар!", time: "3 ч", read: true },
+  { id: 5, type: "message", title: "Отзыв покупателя", text: "★★★★★ Отличный товар!", time: "3 ч", read: true },
 ];
 
 const MOCK_PRODUCTS = [
@@ -68,6 +68,26 @@ const MOCK_STORAGE = [
   { id: "D-04", name: "Секция D — Аксессуары", items: 312, capacity: 400, used: 78 },
 ];
 
+const statusConfig = {
+  new: { label: "Новый", color: "text-blue-600 bg-blue-50 border-blue-200" },
+  processing: { label: "В обработке", color: "text-orange-600 bg-orange-50 border-orange-200" },
+  shipped: { label: "Отправлен", color: "text-purple-600 bg-purple-50 border-purple-200" },
+  delivered: { label: "Доставлен", color: "text-green-600 bg-green-50 border-green-200" },
+  cancelled: { label: "Отменён", color: "text-red-500 bg-red-50 border-red-200" },
+};
+
+const productStatusConfig = {
+  active: { label: "В наличии", color: "text-green-600 bg-green-50" },
+  low: { label: "Мало", color: "text-orange-600 bg-orange-50" },
+  out: { label: "Нет", color: "text-red-500 bg-red-50" },
+};
+
+const notifTypeConfig = {
+  order: { icon: "ShoppingCart", color: "text-orange-500", bg: "bg-orange-50" },
+  message: { icon: "MessageCircle", color: "text-blue-500", bg: "bg-blue-50" },
+  change: { icon: "RefreshCw", color: "text-green-500", bg: "bg-green-50" },
+};
+
 export default function Index() {
   const [page, setPage] = useState<Page>("home");
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
@@ -89,11 +109,8 @@ export default function Index() {
       const res = await fetch(ORDERS_API);
       const data = await res.json();
       setDbOrders(data.orders || []);
-    } catch {
-      // молча
-    } finally {
-      setOrdersLoading(false);
-    }
+    } catch { /* молча */ }
+    finally { setOrdersLoading(false); }
   };
 
   const showToast = (msg: string) => {
@@ -101,45 +118,32 @@ export default function Index() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+  useEffect(() => { loadOrders(); }, []);
 
   useEffect(() => {
-    loadOrders();
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const newNotif: Notification = {
-        id: Date.now(),
-        type: "order",
+    const t = setTimeout(() => {
+      setNotifications((prev) => [{
+        id: Date.now(), type: "order",
         title: "Новый заказ поступил!",
         text: "Заказ #TAO-8822 на сумму ¥ 975",
-        time: "только что",
-        read: false,
-      };
-      setNotifications((prev) => [newNotif, ...prev]);
-      showToast("🛒 Новый заказ #TAO-8822 на ¥ 975");
+        time: "только что", read: false,
+      }, ...prev]);
+      showToast("Новый заказ #TAO-8822 на ¥ 975");
     }, 8000);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, []);
 
   const categories = ["Все", "Обувь", "Одежда", "Электроника", "Сумки", "Красота", "Аксессуары"];
 
   const filteredProducts = MOCK_PRODUCTS.filter((p) => {
     const matchCat = categoryFilter === "Все" || p.category === categoryFilter;
-    const matchSearch =
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
   const allOrders = dbOrders.length > 0
     ? dbOrders.map((o) => ({
-        id: o.order_num,
-        buyer: o.buyer_name,
-        items: o.quantity,
+        id: o.order_num, buyer: o.buyer_name, items: o.quantity,
         total: o.total_rub ? `${o.total_rub.toLocaleString("ru")} ₽` : `¥ ${o.price_yuan ?? "—"}`,
         status: o.status,
         date: new Date(o.created_at).toLocaleDateString("ru", { day: "numeric", month: "short", year: "numeric" }),
@@ -147,10 +151,7 @@ export default function Index() {
       }))
     : MOCK_ORDERS;
 
-  const filteredOrders = allOrders.filter((o) => {
-    return orderStatusFilter === "Все" || o.status === orderStatusFilter;
-  });
-
+  const filteredOrders = allOrders.filter((o) => orderStatusFilter === "Все" || o.status === orderStatusFilter);
   const newOrdersCount = allOrders.filter((o) => o.status === "new").length;
 
   const navItems: { id: Page; icon: string; label: string; badge?: number }[] = [
@@ -162,167 +163,129 @@ export default function Index() {
     { id: "help", icon: "LifeBuoy", label: "Помощь" },
   ];
 
-  const statusConfig = {
-    new: { label: "Новый", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-    processing: { label: "В обработке", color: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
-    shipped: { label: "Отправлен", color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
-    delivered: { label: "Доставлен", color: "text-green-400 bg-green-500/10 border-green-500/20" },
-    cancelled: { label: "Отменён", color: "text-red-400 bg-red-500/10 border-red-500/20" },
-  };
-
-  const productStatusConfig = {
-    active: { label: "В наличии", color: "text-green-400 bg-green-500/10" },
-    low: { label: "Мало", color: "text-orange-400 bg-orange-500/10" },
-    out: { label: "Нет", color: "text-red-400 bg-red-500/10" },
-  };
-
-  const notifTypeConfig = {
-    order: { icon: "ShoppingCart", color: "text-orange-400", bg: "bg-orange-500/10" },
-    message: { icon: "MessageCircle", color: "text-blue-400", bg: "bg-blue-500/10" },
-    change: { icon: "RefreshCw", color: "text-green-400", bg: "bg-green-500/10" },
-  };
+  const SURFACE = "#f8f9fc";
+  const BORDER = "#e8ecf4";
+  const PURPLE = "#7c5cbf";
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "var(--tao-dark)", fontFamily: "'Golos Text', sans-serif" }}>
+    <div className="flex h-screen overflow-hidden bg-white">
 
-      {/* Sidebar */}
+      {/* ===== SIDEBAR ===== */}
       <aside
         className={`flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out ${sidebarOpen ? "w-60" : "w-16"}`}
-        style={{ background: "var(--tao-surface)", borderRight: "1px solid var(--tao-border)" }}
+        style={{ background: "#fff", borderRight: `1px solid ${BORDER}` }}
       >
-        <div className="flex items-center gap-3 px-4 h-16 border-b" style={{ borderColor: "var(--tao-border)" }}>
-          <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center gradient-brand">
-            <span className="text-white font-bold text-sm" style={{ fontFamily: "'Oswald', sans-serif" }}>T</span>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-4 h-16 border-b" style={{ borderColor: BORDER }}>
+          <div className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center gradient-brand shadow-sm">
+            <span className="text-white font-bold text-base" style={{ fontFamily: "'Oswald', sans-serif" }}>T</span>
           </div>
           {sidebarOpen && (
             <div className="fade-in">
-              <div className="font-bold text-white text-lg leading-none" style={{ fontFamily: "'Oswald', sans-serif" }}>TaoSeller</div>
-              <div className="text-xs" style={{ color: "var(--tao-red)" }}>Таобао платформа</div>
+              <div className="font-bold text-gray-900 text-lg leading-tight" style={{ fontFamily: "'Oswald', sans-serif" }}>TaoSeller</div>
+              <div className="text-xs font-medium" style={{ color: PURPLE }}>Маркетплейс</div>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 py-4 space-y-1 px-2">
+        {/* Nav */}
+        <nav className="flex-1 py-4 space-y-0.5 px-2">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setPage(item.id)}
-              className={`nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                page === item.id ? "active" : "text-gray-400 hover:text-white hover:bg-white/5"
+              className={`nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                page === item.id ? "active" : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
               }`}
-              style={page === item.id ? { color: "var(--tao-red)" } : {}}
+              style={page === item.id ? { color: PURPLE } : {}}
             >
               <div className="flex-shrink-0 relative">
                 <Icon name={item.icon} size={18} />
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span
-                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold pulse-dot gradient-brand"
-                  >
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold pulse-dot gradient-brand">
                     {item.badge}
                   </span>
                 )}
               </div>
-              {sidebarOpen && <span>{item.label}</span>}
+              {sidebarOpen && <span className="fade-in">{item.label}</span>}
             </button>
           ))}
         </nav>
 
+        {/* User */}
         {sidebarOpen && (
-          <div className="p-3 border-t" style={{ borderColor: "var(--tao-border)" }}>
-            <div className="flex items-center gap-3 p-2 rounded-lg" style={{ background: "rgba(255,255,255,0.04)" }}>
-              <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                Ю
-              </div>
+          <div className="p-3 border-t fade-in" style={{ borderColor: BORDER }}>
+            <div className="flex items-center gap-3 p-2 rounded-xl" style={{ background: SURFACE }}>
+              <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white font-bold text-sm flex-shrink-0">Ю</div>
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-white truncate">Юрий Продавцов</div>
-                <div className="text-xs" style={{ color: "var(--tao-green)" }}>● Онлайн</div>
+                <div className="text-sm font-semibold text-gray-800 truncate">Юрий Продавцов</div>
+                <div className="text-xs text-green-500 font-medium">● Онлайн</div>
               </div>
             </div>
           </div>
         )}
       </aside>
 
-      {/* Main */}
+      {/* ===== MAIN ===== */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Top bar */}
-        <header
-          className="flex items-center justify-between px-6 h-16 flex-shrink-0"
-          style={{ background: "var(--tao-surface)", borderBottom: "1px solid var(--tao-border)" }}
-        >
+        <header className="flex items-center justify-between px-6 h-16 flex-shrink-0 bg-white" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
-            >
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all">
               <Icon name={sidebarOpen ? "PanelLeftClose" : "PanelLeftOpen"} size={18} />
             </button>
-            <div className="text-white font-semibold text-lg" style={{ fontFamily: "'Oswald', sans-serif" }}>
+            <div className="font-bold text-gray-900 text-lg" style={{ fontFamily: "'Oswald', sans-serif" }}>
               {navItems.find((n) => n.id === page)?.label}
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative hidden md:flex items-center">
-              <Icon name="Search" size={15} className="absolute left-3 text-gray-500" />
+              <Icon name="Search" size={15} className="absolute left-3 text-gray-400" />
               <input
-                className="pl-9 pr-4 py-2 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none w-52 transition-all"
-                style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
+                className="pl-9 pr-4 py-2 rounded-full text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 w-52 transition-all"
+                style={{ background: SURFACE, border: `1px solid ${BORDER}`, focusRingColor: PURPLE }}
                 placeholder="Поиск..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (page !== "catalog") setPage("catalog");
-                }}
+                onChange={(e) => { setSearchQuery(e.target.value); if (page !== "catalog") setPage("catalog"); }}
               />
             </div>
 
+            {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                className="relative p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
               >
                 <Icon name="Bell" size={18} />
                 {unreadCount > 0 && (
-                  <span
-                    className="absolute top-1 right-1 w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold gradient-brand pulse-dot"
-                  >
-                    {unreadCount}
-                  </span>
+                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold gradient-brand pulse-dot">{unreadCount}</span>
                 )}
               </button>
 
               {showNotifications && (
-                <div
-                  className="absolute right-0 top-11 w-80 rounded-xl shadow-2xl z-50 overflow-hidden notification-enter"
-                  style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}
-                >
-                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--tao-border)" }}>
-                    <span className="font-semibold text-white text-sm">Уведомления</span>
-                    <button onClick={markAllRead} className="text-xs" style={{ color: "var(--tao-red)" }}>
-                      Прочитать все
-                    </button>
+                <div className="absolute right-0 top-11 w-80 rounded-2xl shadow-xl z-50 overflow-hidden notification-enter bg-white" style={{ border: `1px solid ${BORDER}` }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BORDER }}>
+                    <span className="font-semibold text-gray-800 text-sm">Уведомления</span>
+                    <button onClick={() => setNotifications((p) => p.map((n) => ({ ...n, read: true })))} className="text-xs font-medium" style={{ color: PURPLE }}>Прочитать все</button>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
                     {notifications.map((n) => {
                       const cfg = notifTypeConfig[n.type];
                       return (
-                        <div
-                          key={n.id}
-                          className={`flex gap-3 px-4 py-3 border-b cursor-pointer transition-all hover:bg-white/3 ${!n.read ? "bg-white/2" : ""}`}
-                          style={{ borderColor: "var(--tao-border)" }}
-                        >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
+                        <div key={n.id} className={`flex gap-3 px-4 py-3 border-b hover:bg-gray-50 transition-all cursor-pointer ${!n.read ? "bg-purple-50/30" : ""}`} style={{ borderColor: BORDER }}>
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
                             <Icon name={cfg.icon} size={15} className={cfg.color} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className={`text-xs font-semibold ${!n.read ? "text-white" : "text-gray-400"}`}>{n.title}</span>
-                              <span className="text-xs text-gray-600">{n.time}</span>
+                              <span className={`text-xs font-semibold ${!n.read ? "text-gray-800" : "text-gray-500"}`}>{n.title}</span>
+                              <span className="text-xs text-gray-400">{n.time}</span>
                             </div>
                             <div className="text-xs text-gray-500 truncate">{n.text}</div>
                           </div>
-                          {!n.read && <div className="w-1.5 h-1.5 rounded-full self-center flex-shrink-0" style={{ background: "var(--tao-red)" }} />}
+                          {!n.read && <div className="w-2 h-2 rounded-full self-center flex-shrink-0" style={{ background: PURPLE }} />}
                         </div>
                       );
                     })}
@@ -331,75 +294,150 @@ export default function Index() {
               )}
             </div>
 
-            <button
-              onClick={() => showToast("Настройки — скоро!")}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
-            >
+            <button onClick={() => showToast("Настройки — скоро!")} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all">
               <Icon name="Settings" size={18} />
             </button>
           </div>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6" style={{ background: SURFACE }}>
 
-          {/* HOME */}
+          {/* ===== HOME ===== */}
           {page === "home" && (
             <div className="space-y-6 slide-in">
+
+              {/* Hero */}
+              <div className="rounded-3xl overflow-hidden relative" style={{ background: "radial-gradient(ellipse 80% 100% at 70% 50%, #ede9ff 0%, #f5f3ff 50%, #fff 100%)", minHeight: 260 }}>
+                <div className="flex items-center justify-between px-10 py-10">
+                  <div className="max-w-md">
+                    <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: PURPLE }}>Таобао · Tmall · 1688</div>
+                    <h1 className="text-4xl font-bold leading-tight text-gray-900 mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
+                      Управляй продажами<br />
+                      <span className="gradient-brand-text">из одного места</span>
+                    </h1>
+                    <p className="text-sm text-gray-500 mb-6 leading-relaxed">Заказы, склад, каталог и аналитика — всё для вашего бизнеса с китайскими площадками.</p>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => setShowOrderForm(true)} className="btn-primary flex items-center gap-2">
+                        <Icon name="Plus" size={15} />
+                        Заказ с Таобао
+                      </button>
+                      <button onClick={() => setPage("catalog")} className="btn-outline">Каталог</button>
+                    </div>
+                  </div>
+
+                  {/* Stats card float */}
+                  <div className="hidden lg:flex flex-col gap-3 mr-4">
+                    {[
+                      { label: "175K", sub: "Обработано заказов", icon: "ShoppingBag", gradient: "gradient-brand" },
+                      { label: "50+", sub: "Категорий товаров", icon: "Package", gradient: "gradient-cyan" },
+                    ].map((s, i) => (
+                      <div key={i} className="bg-white rounded-2xl px-5 py-3.5 flex items-center gap-4 shadow-md float-anim" style={{ animationDelay: `${i * 0.5}s` }}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.gradient}`}>
+                          <Icon name={s.icon} size={18} className="text-white" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-gray-900 text-lg leading-none" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.label}</div>
+                          <div className="text-xs text-gray-500">{s.sub}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* decorative circles */}
+                <div className="absolute top-6 right-6 w-12 h-12 rounded-full opacity-30" style={{ background: PURPLE }} />
+                <div className="absolute top-14 right-16 w-6 h-6 rounded-full opacity-20" style={{ background: PURPLE }} />
+              </div>
+
+              {/* Stats row */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "Выручка сегодня", value: "¥ 12,480", delta: "+18%", icon: "TrendingUp", color: "#30D158", bg: "rgba(48,209,88,0.1)" },
-                  { label: "Новых заказов", value: "24", delta: "+5 за час", icon: "ShoppingCart", color: "#FF9500", bg: "rgba(255,149,0,0.1)" },
-                  { label: "Активных товаров", value: "312", delta: "6 заканчиваются", icon: "Package", color: "#0A84FF", bg: "rgba(10,132,255,0.1)" },
-                  { label: "Сообщений", value: "7", delta: "Требуют ответа", icon: "MessageCircle", color: "#BF5AF2", bg: "rgba(191,90,242,0.1)" },
+                  { label: "Выручка сегодня", value: "¥ 12,480", delta: "+18%", icon: "TrendingUp", grad: "gradient-brand" },
+                  { label: "Новых заказов", value: "24", delta: "+5 за час", icon: "ShoppingCart", grad: "gradient-pink" },
+                  { label: "Активных товаров", value: "312", delta: "6 заканчиваются", icon: "Package", grad: "gradient-cyan" },
+                  { label: "Сообщений", value: "7", delta: "Ждут ответа", icon: "MessageCircle", grad: "gradient-amber" },
                 ].map((s, i) => (
-                  <div
-                    key={i}
-                    className="card-hover rounded-xl p-5 cursor-pointer"
-                    style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)", animationDelay: `${i * 0.07}s` }}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: s.bg }}>
-                        <Icon name={s.icon} size={18} style={{ color: s.color }} />
+                  <div key={i} className="card-light p-5 cursor-pointer" style={{ animationDelay: `${i * 0.07}s` }}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${s.grad}`}>
+                        <Icon name={s.icon} size={19} className="text-white" />
                       </div>
-                      <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ color: s.color, background: "rgba(255,255,255,0.05)" }}>
-                        {s.delta}
-                      </span>
+                      <span className="text-xs px-2.5 py-1 rounded-full font-semibold text-gray-500 bg-gray-100">{s.delta}</span>
                     </div>
-                    <div className="text-2xl text-white font-semibold" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.value}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                    <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.value}</div>
+                    <div className="text-xs text-gray-400 mt-0.5 font-medium">{s.label}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2 rounded-xl p-5" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-white text-base" style={{ fontFamily: "'Oswald', sans-serif" }}>Последние заказы</h3>
-                    <button onClick={() => setPage("orders")} className="text-xs font-medium hover:opacity-80" style={{ color: "var(--tao-red)" }}>
-                      Все заказы →
+              {/* Browse categories — как на макете */}
+              <div className="bg-white rounded-3xl p-6" style={{ border: `1px solid ${BORDER}` }}>
+                <h3 className="font-bold text-gray-900 text-lg mb-5" style={{ fontFamily: "'Oswald', sans-serif" }}>Категории товаров</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {[
+                    { label: "Обувь", icon: "Footprints", grad: "gradient-pink" },
+                    { label: "Электроника", icon: "Cpu", grad: "gradient-purple" },
+                    { label: "Одежда", icon: "Shirt", grad: "gradient-cyan" },
+                    { label: "Аксессуары", icon: "Watch", grad: "gradient-amber" },
+                    { label: "Все категории", icon: "ArrowRight", grad: "gradient-brand", special: true },
+                  ].map((c, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setCategoryFilter(c.special ? "Все" : c.label); setPage("catalog"); }}
+                      className={`flex flex-col items-start gap-3 p-5 rounded-2xl transition-all group hover:scale-105 ${c.special ? "items-center justify-center" : ""}`}
+                      style={c.special
+                        ? { background: "#f0ebff", border: `1.5px dashed ${PURPLE}` }
+                        : undefined}
+                    >
+                      {!c.special && (
+                        <>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${c.grad} shadow-md`}>
+                            <Icon name={c.icon} size={22} className="text-white" />
+                          </div>
+                          <span className="font-bold text-sm text-white leading-tight hidden" />
+                          <div className={`w-full rounded-2xl py-4 px-4 ${c.grad} shadow-sm`}>
+                            <Icon name={c.icon} size={24} className="text-white mb-2" />
+                            <div className="font-bold text-white text-sm leading-tight">{c.label}</div>
+                          </div>
+                        </>
+                      )}
+                      {c.special && (
+                        <>
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${c.grad}`}>
+                            <Icon name={c.icon} size={20} className="text-white" />
+                          </div>
+                          <span className="font-semibold text-sm" style={{ color: PURPLE }}>Смотреть все</span>
+                        </>
+                      )}
                     </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recent orders */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2 bg-white rounded-3xl p-5" style={{ border: `1px solid ${BORDER}` }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-900 text-base" style={{ fontFamily: "'Oswald', sans-serif" }}>Последние заказы</h3>
+                    <button onClick={() => setPage("orders")} className="text-xs font-semibold hover:opacity-70 transition-opacity" style={{ color: PURPLE }}>Все заказы →</button>
                   </div>
                   <div className="space-y-2">
                     {MOCK_ORDERS.slice(0, 4).map((order) => {
                       const sc = statusConfig[order.status as keyof typeof statusConfig];
                       return (
-                        <div
-                          key={order.id}
-                          className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/3 transition-all"
-                          style={{ border: "1px solid var(--tao-border)" }}
-                        >
+                        <div key={order.id} className="flex items-center justify-between py-2.5 px-3 rounded-2xl hover:bg-gray-50 transition-all" style={{ border: `1px solid ${BORDER}` }}>
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center flex-shrink-0">
-                              <Icon name="ShoppingBag" size={14} className="text-white" />
+                            <div className="w-9 h-9 rounded-2xl gradient-brand flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Icon name="ShoppingBag" size={15} className="text-white" />
                             </div>
                             <div>
-                              <div className="text-sm font-semibold text-white">#{order.id}</div>
-                              <div className="text-xs text-gray-500">{order.buyer}</div>
+                              <div className="text-sm font-bold text-gray-800">#{order.id}</div>
+                              <div className="text-xs text-gray-400">{order.buyer}</div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-semibold" style={{ color: "var(--tao-orange)" }}>{order.total}</div>
+                            <div className="text-sm font-bold" style={{ color: PURPLE }}>{order.total}</div>
                             <span className={`tag-badge border ${sc.color}`}>{sc.label}</span>
                           </div>
                         </div>
@@ -408,19 +446,19 @@ export default function Index() {
                   </div>
                 </div>
 
-                <div className="rounded-xl p-5" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
-                  <h3 className="font-semibold text-white text-base mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>Активность</h3>
+                <div className="bg-white rounded-3xl p-5" style={{ border: `1px solid ${BORDER}` }}>
+                  <h3 className="font-bold text-gray-900 text-base mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>Активность</h3>
                   <div className="space-y-3">
-                    {notifications.slice(0, 5).map((n) => {
+                    {MOCK_NOTIFICATIONS.slice(0, 5).map((n) => {
                       const cfg = notifTypeConfig[n.type];
                       return (
                         <div key={n.id} className="flex gap-3 items-start">
-                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
                             <Icon name={cfg.icon} size={13} className={cfg.color} />
                           </div>
                           <div>
-                            <div className="text-xs font-medium text-white leading-tight">{n.title}</div>
-                            <div className="text-xs text-gray-600">{n.time} назад</div>
+                            <div className="text-xs font-semibold text-gray-700 leading-tight">{n.title}</div>
+                            <div className="text-xs text-gray-400">{n.time} назад</div>
                           </div>
                         </div>
                       );
@@ -428,45 +466,18 @@ export default function Index() {
                   </div>
                 </div>
               </div>
-
-              <div className="rounded-xl p-5" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
-                <h3 className="font-semibold text-white text-base mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>Быстрые действия</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    { label: "Добавить товар", icon: "PlusCircle", color: "#FF4D1A", page: "catalog" as Page },
-                    { label: "Заказ с Таобао", icon: "ShoppingCart", color: "#FF9500", page: "orders" as Page },
-                    { label: "Управление складом", icon: "Warehouse", color: "#0A84FF", page: "storage" as Page },
-                    { label: "Написать в поддержку", icon: "HeadphonesIcon", color: "#30D158", page: "help" as Page },
-                  ].map((a, i) => (
-                    <button
-                      key={i}
-                      onClick={() => i === 1 ? setShowOrderForm(true) : setPage(a.page)}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/5 transition-all group"
-                      style={{ border: "1px solid var(--tao-border)" }}
-                    >
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
-                        style={{ background: `${a.color}18` }}
-                      >
-                        <Icon name={a.icon} size={18} style={{ color: a.color }} />
-                      </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors text-center">{a.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
-          {/* CATALOG */}
+          {/* ===== CATALOG ===== */}
           {page === "catalog" && (
             <div className="space-y-5 slide-in">
-              <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
+              <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-2xl" style={{ border: `1px solid ${BORDER}` }}>
                 <div className="relative flex items-center flex-1 min-w-48">
-                  <Icon name="Search" size={15} className="absolute left-3 text-gray-500" />
+                  <Icon name="Search" size={15} className="absolute left-3 text-gray-400" />
                   <input
-                    className="pl-9 pr-4 py-2 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none w-full transition-all"
-                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
+                    className="pl-9 pr-4 py-2.5 rounded-full text-sm text-gray-700 placeholder-gray-400 focus:outline-none w-full"
+                    style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
                     placeholder="Поиск по названию или SKU..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -477,57 +488,43 @@ export default function Index() {
                     <button
                       key={cat}
                       onClick={() => setCategoryFilter(cat)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${categoryFilter === cat ? "text-white" : "text-gray-400 hover:text-white"}`}
-                      style={categoryFilter === cat ? { background: "linear-gradient(135deg, #FF4D1A, #FF9500)" } : { background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
+                      className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${categoryFilter === cat ? "text-white shadow-sm" : "text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200"}`}
+                      style={categoryFilter === cat ? { background: PURPLE } : {}}
                     >
                       {cat}
                     </button>
                   ))}
                 </div>
-                <button
-                  onClick={() => showToast("Форма добавления товара — скоро!")}
-                  className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium gradient-brand hover:opacity-90 transition-opacity"
-                >
+                <button onClick={() => showToast("Форма добавления — скоро!")} className="btn-primary ml-auto flex items-center gap-2">
                   <Icon name="Plus" size={15} />
                   Добавить товар
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                {filteredProducts.map((p, i) => {
+                {filteredProducts.map((p) => {
                   const sc = productStatusConfig[p.status as keyof typeof productStatusConfig];
                   return (
-                    <div
-                      key={p.id}
-                      className="card-hover rounded-xl overflow-hidden cursor-pointer"
-                      style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}
-                    >
-                      <div className="h-36 flex items-center justify-center text-5xl relative" style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <div key={p.id} className="card-light overflow-hidden cursor-pointer">
+                      <div className="h-36 flex items-center justify-center text-5xl relative" style={{ background: SURFACE, borderRadius: "1.25rem 1.25rem 0 0" }}>
                         {p.img}
                         <span className={`absolute top-3 right-3 tag-badge rounded-full ${sc.color}`}>{sc.label}</span>
                       </div>
                       <div className="p-4">
-                        <div className="font-semibold text-white text-sm mb-1 truncate">{p.name}</div>
-                        <div className="text-xs text-gray-500 mb-3">{p.sku}</div>
+                        <div className="font-bold text-gray-800 text-sm mb-1 truncate">{p.name}</div>
+                        <div className="text-xs text-gray-400 mb-3">{p.sku}</div>
                         <div className="flex items-center justify-between">
-                          <div className="font-bold text-lg" style={{ fontFamily: "'Oswald', sans-serif", color: "var(--tao-orange)" }}>{p.price}</div>
-                          <div className="text-xs text-gray-400">
-                            <Icon name="Box" size={12} className="inline mr-1" />
+                          <div className="font-bold text-xl" style={{ fontFamily: "'Oswald', sans-serif", color: PURPLE }}>{p.price}</div>
+                          <div className="text-xs text-gray-400 flex items-center gap-1">
+                            <Icon name="Box" size={12} />
                             {p.stock} шт
                           </div>
                         </div>
                         <div className="mt-3 flex gap-2">
-                          <button
-                            onClick={() => showToast(`Редактирование: ${p.name}`)}
-                            className="flex-1 py-1.5 rounded-lg text-xs font-medium text-gray-300 hover:text-white transition-all"
-                            style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                          >
+                          <button onClick={() => showToast(`Редактирование: ${p.name}`)} className="flex-1 py-2 rounded-full text-xs font-semibold text-gray-600 hover:text-gray-800 transition-all" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>
                             Редактировать
                           </button>
-                          <button
-                            onClick={() => showToast(`${p.name} добавлен в заказ`)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90 transition-opacity"
-                          >
+                          <button onClick={() => showToast(`${p.name} добавлен`)} className="px-3 py-2 rounded-full text-xs font-semibold text-white gradient-brand hover:opacity-90 transition-opacity">
                             <Icon name="Plus" size={13} />
                           </button>
                         </div>
@@ -536,9 +533,8 @@ export default function Index() {
                   );
                 })}
               </div>
-
               {filteredProducts.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <Icon name="SearchX" size={40} className="mb-3 opacity-40" />
                   <div className="text-sm">Товары не найдены</div>
                 </div>
@@ -546,61 +542,43 @@ export default function Index() {
             </div>
           )}
 
-          {/* ORDERS */}
+          {/* ===== ORDERS ===== */}
           {page === "orders" && (
             <div className="space-y-5 slide-in">
-              <div className="flex items-center gap-2 p-3 rounded-xl flex-wrap" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
+              <div className="flex items-center gap-2 p-3 bg-white rounded-2xl flex-wrap" style={{ border: `1px solid ${BORDER}` }}>
                 {["Все", "new", "processing", "shipped", "delivered", "cancelled"].map((s) => {
                   const isActive = orderStatusFilter === s;
                   const label = s === "Все" ? "Все" : statusConfig[s as keyof typeof statusConfig]?.label ?? s;
                   const count = s === "Все" ? MOCK_ORDERS.length : MOCK_ORDERS.filter((o) => o.status === s).length;
                   return (
-                    <button
-                      key={s}
-                      onClick={() => setOrderStatusFilter(s)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isActive ? "text-white" : "text-gray-400 hover:text-white"}`}
-                      style={isActive ? { background: "linear-gradient(135deg, #FF4D1A, #FF9500)" } : { background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
+                    <button key={s} onClick={() => setOrderStatusFilter(s)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all ${isActive ? "text-white shadow-sm" : "text-gray-500 hover:text-gray-700 bg-gray-100"}`}
+                      style={isActive ? { background: PURPLE } : {}}
                     >
                       {label}
-                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? "bg-white/20 text-white" : "bg-white/5 text-gray-500"}`}>
-                        {count}
-                      </span>
+                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? "bg-white/25 text-white" : "bg-white text-gray-500"}`}>{count}</span>
                     </button>
                   );
                 })}
                 <div className="ml-auto flex items-center gap-2">
-                  <button
-                    onClick={() => showToast("Экспорт заказов — скоро!")}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-all"
-                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                  >
-                    <Icon name="Download" size={13} />
-                    Экспорт
+                  <button onClick={loadOrders} disabled={ordersLoading} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all disabled:opacity-40" style={{ border: `1px solid ${BORDER}` }}>
+                    <Icon name={ordersLoading ? "Loader" : "RefreshCw"} size={14} className={ordersLoading ? "animate-spin" : ""} />
                   </button>
-                  <button
-                    onClick={loadOrders}
-                    disabled={ordersLoading}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-all disabled:opacity-50"
-                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                  >
-                    <Icon name={ordersLoading ? "Loader" : "RefreshCw"} size={13} className={ordersLoading ? "animate-spin" : ""} />
+                  <button onClick={() => showToast("Экспорт — скоро!")} className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all" style={{ border: `1px solid ${BORDER}` }}>
+                    <Icon name="Download" size={13} />Экспорт
                   </button>
-                  <button
-                    onClick={() => setShowOrderForm(true)}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90 transition-opacity"
-                  >
-                    <Icon name="Plus" size={13} />
-                    Заказ с Таобао
+                  <button onClick={() => setShowOrderForm(true)} className="btn-primary flex items-center gap-2">
+                    <Icon name="Plus" size={13} />Заказ с Таобао
                   </button>
                 </div>
               </div>
 
-              <div className="rounded-xl overflow-hidden" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
+              <div className="bg-white rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
                 <table className="w-full">
                   <thead>
-                    <tr style={{ borderBottom: "1px solid var(--tao-border)" }}>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}`, background: SURFACE }}>
                       {["Заказ", "Покупатель", "Товары", "Сумма", "Адрес", "Дата", "Статус", ""].map((h) => (
-                        <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                        <th key={h} className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -608,36 +586,21 @@ export default function Index() {
                     {filteredOrders.map((order, i) => {
                       const sc = statusConfig[order.status as keyof typeof statusConfig];
                       return (
-                        <tr
-                          key={order.id}
-                          className="hover:bg-white/2 transition-all"
-                          style={{ borderBottom: i < filteredOrders.length - 1 ? "1px solid var(--tao-border)" : "none" }}
-                        >
-                          <td className="px-4 py-3.5">
-                            <div className="font-semibold text-white text-sm" style={{ fontFamily: "'Oswald', sans-serif" }}>#{order.id}</div>
-                          </td>
+                        <tr key={order.id} className="hover:bg-gray-50 transition-all" style={{ borderBottom: i < filteredOrders.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                          <td className="px-4 py-3.5"><div className="font-bold text-gray-800 text-sm" style={{ fontFamily: "'Oswald', sans-serif" }}>#{order.id}</div></td>
                           <td className="px-4 py-3.5">
                             <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-full gradient-brand flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                                {order.buyer[0]}
-                              </div>
-                              <span className="text-sm text-white">{order.buyer}</span>
+                              <div className="w-7 h-7 rounded-full gradient-brand flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{order.buyer[0]}</div>
+                              <span className="text-sm font-medium text-gray-700">{order.buyer}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3.5 text-sm text-gray-400">{order.items} шт.</td>
+                          <td className="px-4 py-3.5"><span className="font-bold text-sm" style={{ fontFamily: "'Oswald', sans-serif", color: PURPLE }}>{order.total}</span></td>
+                          <td className="px-4 py-3.5 text-xs text-gray-400">{order.address}</td>
+                          <td className="px-4 py-3.5 text-xs text-gray-400">{order.date}</td>
+                          <td className="px-4 py-3.5"><span className={`tag-badge border rounded-full ${sc.color}`}>{sc.label}</span></td>
                           <td className="px-4 py-3.5">
-                            <span className="font-semibold text-sm" style={{ fontFamily: "'Oswald', sans-serif", color: "var(--tao-orange)" }}>{order.total}</span>
-                          </td>
-                          <td className="px-4 py-3.5 text-xs text-gray-500">{order.address}</td>
-                          <td className="px-4 py-3.5 text-xs text-gray-500">{order.date}</td>
-                          <td className="px-4 py-3.5">
-                            <span className={`tag-badge border rounded-full ${sc.color}`}>{sc.label}</span>
-                          </td>
-                          <td className="px-4 py-3.5">
-                            <button
-                              onClick={() => showToast(`Открыт заказ #${order.id}`)}
-                              className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all"
-                            >
+                            <button onClick={() => showToast(`Заказ #${order.id}`)} className="p-1.5 rounded-xl text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-all">
                               <Icon name="ExternalLink" size={13} />
                             </button>
                           </td>
@@ -647,21 +610,16 @@ export default function Index() {
                   </tbody>
                 </table>
                 {ordersLoading && (
-                  <div className="flex items-center justify-center py-10 gap-2 text-gray-500 text-sm">
-                    <Icon name="Loader" size={16} className="animate-spin" />
-                    Загружаю заказы...
+                  <div className="flex items-center justify-center py-10 gap-2 text-gray-400 text-sm">
+                    <Icon name="Loader" size={16} className="animate-spin" />Загружаю заказы...
                   </div>
                 )}
                 {!ordersLoading && filteredOrders.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-14 text-gray-500">
+                  <div className="flex flex-col items-center justify-center py-14 text-gray-400">
                     <Icon name="ShoppingCart" size={36} className="mb-3 opacity-30" />
                     <div className="text-sm mb-3">Заказов пока нет</div>
-                    <button
-                      onClick={() => setShowOrderForm(true)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90"
-                    >
-                      <Icon name="Plus" size={13} />
-                      Создать первый заказ
+                    <button onClick={() => setShowOrderForm(true)} className="btn-primary flex items-center gap-2">
+                      <Icon name="Plus" size={13} />Создать первый заказ
                     </button>
                   </div>
                 )}
@@ -669,276 +627,156 @@ export default function Index() {
             </div>
           )}
 
-          {/* STORAGE */}
+          {/* ===== STORAGE ===== */}
           {page === "storage" && (
             <div className="space-y-5 slide-in">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "Всего товаров", value: "800", icon: "Package", color: "#0A84FF" },
-                  { label: "Занято мест", value: "78%", icon: "BarChart2", color: "#FF9500" },
-                  { label: "Секций", value: "4", icon: "Layers", color: "#BF5AF2" },
-                  { label: "Нужна доставка", value: "12", icon: "Truck", color: "#FF4D1A" },
+                  { label: "Всего товаров", value: "800", icon: "Package", grad: "gradient-purple" },
+                  { label: "Занято мест", value: "78%", icon: "BarChart2", grad: "gradient-amber" },
+                  { label: "Секций", value: "4", icon: "Layers", grad: "gradient-brand" },
+                  { label: "Нужна доставка", value: "12", icon: "Truck", grad: "gradient-pink" },
                 ].map((s, i) => (
-                  <div key={i} className="card-hover rounded-xl p-5" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
+                  <div key={i} className="card-light p-5">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${s.color}18` }}>
-                        <Icon name={s.icon} size={17} style={{ color: s.color }} />
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${s.grad}`}>
+                        <Icon name={s.icon} size={18} className="text-white" />
                       </div>
-                      <span className="text-xs text-gray-500">{s.label}</span>
+                      <span className="text-xs font-medium text-gray-400">{s.label}</span>
                     </div>
-                    <div className="text-2xl text-white font-semibold" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.value}</div>
+                    <div className="text-2xl font-bold text-gray-800" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.value}</div>
                   </div>
                 ))}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {MOCK_STORAGE.map((section) => (
-                  <div key={section.id} className="card-hover rounded-xl p-5" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
+                  <div key={section.id} className="card-light p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <div className="font-semibold text-white" style={{ fontFamily: "'Oswald', sans-serif" }}>{section.name}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">ID: {section.id}</div>
+                        <div className="font-bold text-gray-800" style={{ fontFamily: "'Oswald', sans-serif" }}>{section.name}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">ID: {section.id}</div>
                       </div>
-                      <button
-                        onClick={() => showToast(`Открыта ${section.name}`)}
-                        className="text-xs px-3 py-1 rounded-lg text-gray-400 hover:text-white transition-all"
-                        style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                      >
-                        Открыть
-                      </button>
+                      <button onClick={() => showToast(`Открыта ${section.name}`)} className="text-xs px-3 py-1.5 rounded-full font-semibold text-gray-500 hover:text-gray-700 transition-all" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>Открыть</button>
                     </div>
                     <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-gray-400">{section.items} / {section.capacity} мест</span>
-                      <span
-                        className="font-semibold"
-                        style={{
-                          fontFamily: "'Oswald', sans-serif",
-                          color: section.used > 80 ? "var(--tao-red)" : section.used > 60 ? "var(--tao-orange)" : "var(--tao-green)"
-                        }}
-                      >
-                        {section.used}%
-                      </span>
+                      <span className="text-gray-400">{section.items} / {section.capacity}</span>
+                      <span className="font-bold" style={{ fontFamily: "'Oswald', sans-serif", color: section.used > 80 ? "#ef4444" : section.used > 60 ? "#f97316" : "#22c55e" }}>{section.used}%</span>
                     </div>
-                    <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--tao-dark)" }}>
-                      <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{
-                          width: `${section.used}%`,
-                          background: section.used > 80
-                            ? "linear-gradient(90deg, #FF4D1A, #FF9500)"
-                            : section.used > 60
-                            ? "linear-gradient(90deg, #FF9500, #FFD60A)"
-                            : "linear-gradient(90deg, #30D158, #00E676)",
-                        }}
+                    <div className="h-2.5 rounded-full overflow-hidden bg-gray-100">
+                      <div className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${section.used}%`, background: section.used > 80 ? "linear-gradient(90deg,#ef4444,#f97316)" : section.used > 60 ? "linear-gradient(90deg,#f97316,#fbbf24)" : "linear-gradient(90deg,#22c55e,#4ade80)" }}
                       />
                     </div>
                     <div className="mt-3 flex gap-2">
                       {["Товары", "Движение", "Отчёт"].map((btn) => (
-                        <button
-                          key={btn}
-                          onClick={() => showToast(`${btn}: ${section.name}`)}
-                          className="text-xs px-2.5 py-1 rounded-lg text-gray-500 hover:text-white transition-all"
-                          style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                        >
-                          {btn}
-                        </button>
+                        <button key={btn} onClick={() => showToast(`${btn}: ${section.name}`)} className="text-xs px-3 py-1.5 rounded-full font-medium text-gray-500 hover:text-gray-700 transition-all" style={{ background: SURFACE, border: `1px solid ${BORDER}` }}>{btn}</button>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="rounded-xl p-5" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
-                <h3 className="font-semibold text-white mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>Движение товаров</h3>
-                <div className="space-y-2">
-                  {[
-                    { action: "Поступление", item: "Кроссовки Nike Air Max 270", qty: "+50 шт", time: "Сегодня 10:30", type: "in" },
-                    { action: "Отгрузка", item: "Рюкзак городской Xiaomi", qty: "-12 шт", time: "Сегодня 09:15", type: "out" },
-                    { action: "Поступление", item: "Умные часы DT3 Pro", qty: "+20 шт", time: "Вчера 16:45", type: "in" },
-                    { action: "Отгрузка", item: "Куртка зимняя мужская", qty: "-5 шт", time: "Вчера 14:20", type: "out" },
-                    { action: "Инвентаризация", item: "Секция C — Электроника", qty: "89 шт", time: "Вчера 11:00", type: "check" },
-                  ].map((m, i) => (
-                    <div key={i} className="flex items-center justify-between py-2.5 px-3 rounded-lg" style={{ border: "1px solid var(--tao-border)" }}>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ background: m.type === "in" ? "rgba(48,209,88,0.1)" : m.type === "out" ? "rgba(255,77,26,0.1)" : "rgba(10,132,255,0.1)" }}
-                        >
-                          <Icon
-                            name={m.type === "in" ? "ArrowDownCircle" : m.type === "out" ? "ArrowUpCircle" : "ClipboardList"}
-                            size={14}
-                            style={{ color: m.type === "in" ? "#30D158" : m.type === "out" ? "#FF4D1A" : "#0A84FF" }}
-                          />
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium text-white">{m.action}: </span>
-                          <span className="text-sm text-gray-400">{m.item}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold" style={{ fontFamily: "'Oswald', sans-serif", color: m.type === "in" ? "#30D158" : m.type === "out" ? "#FF4D1A" : "#0A84FF" }}>
-                          {m.qty}
-                        </div>
-                        <div className="text-xs text-gray-600">{m.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
-          {/* PROFILE */}
+          {/* ===== PROFILE ===== */}
           {page === "profile" && (
-            <div className="space-y-5 slide-in max-w-3xl">
-              <div className="rounded-xl p-6" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
+            <div className="space-y-5 slide-in max-w-2xl">
+              <div className="bg-white rounded-3xl p-6" style={{ border: `1px solid ${BORDER}` }}>
                 <div className="flex items-center gap-5 mb-6">
-                  <div
-                    className="w-20 h-20 rounded-2xl gradient-brand flex items-center justify-center text-white font-bold text-3xl flex-shrink-0 glow-red"
-                    style={{ fontFamily: "'Oswald', sans-serif" }}
-                  >
-                    Ю
-                  </div>
+                  <div className="w-20 h-20 rounded-3xl gradient-brand flex items-center justify-center text-white font-bold text-3xl flex-shrink-0 shadow-lg" style={{ fontFamily: "'Oswald', sans-serif" }}>Ю</div>
                   <div>
-                    <h2 className="font-bold text-white text-xl" style={{ fontFamily: "'Oswald', sans-serif" }}>Юрий Продавцов</h2>
+                    <h2 className="font-bold text-gray-900 text-xl" style={{ fontFamily: "'Oswald', sans-serif" }}>Юрий Продавцов</h2>
                     <div className="text-sm text-gray-400 mt-0.5">yuri@taoseller.ru</div>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="tag-badge" style={{ color: "#FF9500", background: "rgba(255,149,0,0.12)" }}>Pro продавец</span>
-                      <span className="tag-badge" style={{ color: "#30D158", background: "rgba(48,209,88,0.12)" }}>★ 4.9 рейтинг</span>
+                      <span className="tag-badge rounded-full bg-purple-50 text-purple-600">Pro продавец</span>
+                      <span className="tag-badge rounded-full bg-green-50 text-green-600">★ 4.9 рейтинг</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => showToast("Редактирование профиля — скоро!")}
-                    className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white transition-all"
-                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                  >
-                    <Icon name="Pencil" size={14} />
-                    Изменить
+                  <button onClick={() => showToast("Редактирование — скоро!")} className="ml-auto btn-outline flex items-center gap-2">
+                    <Icon name="Pencil" size={13} />Изменить
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-4 pt-4" style={{ borderTop: "1px solid var(--tao-border)" }}>
-                  {[
-                    { label: "Заказов выполнено", value: "1,248" },
-                    { label: "На платформе", value: "2 года" },
-                    { label: "Товаров активно", value: "312" },
-                  ].map((s) => (
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t" style={{ borderColor: BORDER }}>
+                  {[{ label: "Заказов выполнено", value: "1,248" }, { label: "На платформе", value: "2 года" }, { label: "Товаров активно", value: "312" }].map((s) => (
                     <div key={s.label} className="text-center">
-                      <div className="text-2xl text-white font-semibold" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.value}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                      <div className="text-2xl font-bold text-gray-800" style={{ fontFamily: "'Oswald', sans-serif" }}>{s.value}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div className="rounded-xl overflow-hidden" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
-                <div className="px-5 py-3 border-b" style={{ borderColor: "var(--tao-border)" }}>
-                  <h3 className="font-semibold text-white" style={{ fontFamily: "'Oswald', sans-serif" }}>Настройки</h3>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+                <div className="px-5 py-3 border-b" style={{ borderColor: BORDER, background: SURFACE }}>
+                  <h3 className="font-bold text-gray-800" style={{ fontFamily: "'Oswald', sans-serif" }}>Настройки</h3>
                 </div>
                 {[
                   { label: "Язык интерфейса", value: "Русский", icon: "Globe" },
                   { label: "Часовой пояс", value: "UTC+3 (Москва)", icon: "Clock" },
                   { label: "Уведомления", value: "Включены", icon: "Bell" },
                   { label: "Двухфакторная аутентификация", value: "Выключена", icon: "Shield" },
-                  { label: "Подписка", value: "Pro — активна до 1 янв 2027", icon: "CreditCard" },
-                  { label: "API-ключ Таобао", value: "••••••••••••••••••••", icon: "Key" },
+                  { label: "Подписка", value: "Pro — до 1 янв 2027", icon: "CreditCard" },
+                  { label: "API-ключ Таобао", value: "••••••••••••••", icon: "Key" },
                 ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between px-5 py-3.5 hover:bg-white/2 transition-all cursor-pointer"
-                    style={{ borderBottom: i < 5 ? "1px solid var(--tao-border)" : "none" }}
-                    onClick={() => showToast(`${item.label} — скоро!`)}
-                  >
+                  <div key={i} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-all cursor-pointer" style={{ borderBottom: i < 5 ? `1px solid ${BORDER}` : "none" }} onClick={() => showToast(`${item.label} — скоро!`)}>
                     <div className="flex items-center gap-3">
-                      <Icon name={item.icon} size={16} className="text-gray-500" />
-                      <span className="text-sm text-white">{item.label}</span>
+                      <Icon name={item.icon} size={16} className="text-gray-400" />
+                      <span className="text-sm text-gray-700">{item.label}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">{item.value}</span>
-                      <Icon name="ChevronRight" size={14} className="text-gray-600" />
+                      <span className="text-sm text-gray-400">{item.value}</span>
+                      <Icon name="ChevronRight" size={14} className="text-gray-300" />
                     </div>
                   </div>
                 ))}
               </div>
-
-              <button
-                onClick={() => showToast("Выход — скоро!")}
-                className="w-full py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
-                style={{ background: "rgba(255,77,26,0.1)", border: "1px solid rgba(255,77,26,0.2)", color: "var(--tao-red)" }}
-              >
-                Выйти из аккаунта
-              </button>
+              <button onClick={() => showToast("Выход — скоро!")} className="w-full py-3 rounded-2xl text-sm font-semibold transition-all hover:opacity-80 text-red-500 bg-red-50" style={{ border: "1.5px solid #fecaca" }}>Выйти из аккаунта</button>
             </div>
           )}
 
-          {/* HELP */}
+          {/* ===== HELP ===== */}
           {page === "help" && (
-            <div className="space-y-5 slide-in max-w-3xl">
-              <div
-                className="rounded-xl p-8 text-center"
-                style={{ background: "linear-gradient(135deg, rgba(255,77,26,0.12) 0%, rgba(255,149,0,0.08) 100%)", border: "1px solid rgba(255,77,26,0.2)" }}
-              >
-                <div className="w-14 h-14 mx-auto rounded-2xl gradient-brand flex items-center justify-center mb-4 glow-red" style={{ animation: "float 3s ease-in-out infinite" }}>
-                  <Icon name="LifeBuoy" size={24} className="text-white" />
+            <div className="space-y-5 slide-in max-w-2xl">
+              <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg, #f0ebff 0%, #fdf4ff 100%)", border: `1.5px solid #e0d7ff` }}>
+                <div className="w-16 h-16 mx-auto rounded-3xl gradient-brand flex items-center justify-center mb-4 shadow-lg float-anim">
+                  <Icon name="LifeBuoy" size={26} className="text-white" />
                 </div>
-                <h2 className="font-bold text-white text-2xl mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>Как мы можем помочь?</h2>
-                <p className="text-gray-400 text-sm mb-5">Найдите ответ в базе знаний или обратитесь в поддержку</p>
+                <h2 className="font-bold text-gray-900 text-2xl mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>Как мы можем помочь?</h2>
+                <p className="text-gray-500 text-sm mb-5">Найдите ответ в базе знаний или обратитесь в поддержку</p>
                 <div className="relative max-w-md mx-auto">
-                  <Icon name="Search" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <input
-                    className="w-full pl-11 pr-4 py-3 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none transition-all"
-                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                    placeholder="Поиск по базе знаний..."
-                    onFocus={() => showToast("База знаний — скоро!")}
-                  />
+                  <Icon name="Search" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input className="w-full pl-11 pr-4 py-3 rounded-full text-sm text-gray-700 placeholder-gray-400 focus:outline-none bg-white shadow-sm" style={{ border: `1px solid ${BORDER}` }} placeholder="Поиск по базе знаний..." onFocus={() => showToast("База знаний — скоро!")} />
                 </div>
               </div>
 
-              <div className="rounded-xl overflow-hidden" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
-                <div className="px-5 py-3 border-b" style={{ borderColor: "var(--tao-border)" }}>
-                  <h3 className="font-semibold text-white" style={{ fontFamily: "'Oswald', sans-serif" }}>Частые вопросы</h3>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+                <div className="px-5 py-3 border-b" style={{ borderColor: BORDER, background: SURFACE }}>
+                  <h3 className="font-bold text-gray-800" style={{ fontFamily: "'Oswald', sans-serif" }}>Частые вопросы</h3>
                 </div>
-                {[
-                  "Как добавить новый товар в каталог?",
-                  "Как подключить аккаунт Таобао?",
-                  "Как настроить автоматические уведомления?",
-                  "Как экспортировать отчёт по заказам?",
-                  "Как изменить настройки склада?",
-                ].map((q, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between px-5 py-3.5 hover:bg-white/2 transition-all cursor-pointer"
-                    style={{ borderBottom: i < 4 ? "1px solid var(--tao-border)" : "none" }}
-                    onClick={() => showToast("Ответ на вопрос — скоро!")}
-                  >
+                {["Как добавить новый товар в каталог?", "Как подключить аккаунт Таобао?", "Как настроить автоматические уведомления?", "Как экспортировать отчёт по заказам?", "Как изменить настройки склада?"].map((q, i) => (
+                  <div key={i} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-all cursor-pointer" style={{ borderBottom: i < 4 ? `1px solid ${BORDER}` : "none" }} onClick={() => showToast("Ответ — скоро!")}>
                     <div className="flex items-center gap-3">
-                      <Icon name="HelpCircle" size={15} className="text-gray-500 flex-shrink-0" />
-                      <span className="text-sm text-white">{q}</span>
+                      <Icon name="HelpCircle" size={15} className="text-gray-300 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">{q}</span>
                     </div>
-                    <Icon name="ChevronRight" size={14} className="text-gray-600 flex-shrink-0" />
+                    <Icon name="ChevronRight" size={14} className="text-gray-300 flex-shrink-0" />
                   </div>
                 ))}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { icon: "MessageCircle", title: "Онлайн-чат", desc: "Ответим в течение 5 минут", action: "Написать", color: "#0A84FF" },
-                  { icon: "Mail", title: "Email поддержка", desc: "support@taoseller.ru", action: "Написать", color: "#30D158" },
-                  { icon: "Phone", title: "Телефон", desc: "+7 800 000-00-00", action: "Позвонить", color: "#FF9500" },
+                  { icon: "MessageCircle", title: "Онлайн-чат", desc: "Ответим за 5 минут", action: "Написать", grad: "gradient-purple" },
+                  { icon: "Mail", title: "Email", desc: "support@taoseller.ru", action: "Написать", grad: "gradient-cyan" },
+                  { icon: "Phone", title: "Телефон", desc: "+7 800 000-00-00", action: "Позвонить", grad: "gradient-amber" },
                 ].map((c, i) => (
-                  <div
-                    key={i}
-                    className="card-hover rounded-xl p-5 text-center cursor-pointer"
-                    style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}
-                    onClick={() => showToast(`${c.title} — скоро!`)}
-                  >
-                    <div className="w-11 h-11 rounded-xl mx-auto flex items-center justify-center mb-3" style={{ background: `${c.color}18` }}>
-                      <Icon name={c.icon} size={20} style={{ color: c.color }} />
+                  <div key={i} className="card-light p-5 text-center cursor-pointer" onClick={() => showToast(`${c.title} — скоро!`)}>
+                    <div className={`w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-3 ${c.grad} shadow-sm`}>
+                      <Icon name={c.icon} size={20} className="text-white" />
                     </div>
-                    <div className="font-semibold text-white text-sm mb-1">{c.title}</div>
-                    <div className="text-xs text-gray-500 mb-3">{c.desc}</div>
-                    <button className="w-full py-2 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90 transition-opacity">
-                      {c.action}
-                    </button>
+                    <div className="font-bold text-gray-800 text-sm mb-1">{c.title}</div>
+                    <div className="text-xs text-gray-400 mb-3">{c.desc}</div>
+                    <button className="w-full py-2 rounded-full text-xs font-semibold text-white gradient-brand hover:opacity-90 transition-opacity">{c.action}</button>
                   </div>
                 ))}
               </div>
@@ -950,23 +788,16 @@ export default function Index() {
 
       {/* Toast */}
       {toastMessage && (
-        <div
-          className="fixed bottom-6 right-6 z-50 notification-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl"
-          style={{ background: "var(--tao-surface)", border: "1px solid rgba(255,77,26,0.3)" }}
-        >
-          <div className="w-7 h-7 rounded-lg gradient-brand flex items-center justify-center flex-shrink-0">
-            <Icon name="Zap" size={13} className="text-white" />
+        <div className="fixed bottom-6 right-6 z-50 notification-enter flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl bg-white" style={{ border: `1.5px solid ${BORDER}` }}>
+          <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center flex-shrink-0 shadow-sm">
+            <Icon name="Zap" size={14} className="text-white" />
           </div>
-          <span className="text-sm text-white">{toastMessage}</span>
+          <span className="text-sm font-medium text-gray-700">{toastMessage}</span>
         </div>
       )}
 
-      {/* Overlay for notifications */}
-      {showNotifications && (
-        <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-      )}
+      {showNotifications && <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />}
 
-      {/* Order Form Modal */}
       {showOrderForm && (
         <OrderForm
           onClose={() => setShowOrderForm(false)}
@@ -976,17 +807,10 @@ export default function Index() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  buyer_name: data.name,
-                  buyer_phone: data.phone,
-                  address: data.address,
-                  link: data.link,
-                  quantity: data.quantity,
-                  variant: data.variant,
-                  comment: data.comment,
-                  photo: data.photo,
-                  price_yuan: data.priceYuan,
-                  price_rub: data.priceRub,
-                  total_rub: data.totalRub,
+                  buyer_name: data.name, buyer_phone: data.phone, address: data.address,
+                  link: data.link, quantity: data.quantity, variant: data.variant,
+                  comment: data.comment, photo: data.photo,
+                  price_yuan: data.priceYuan, price_rub: data.priceRub, total_rub: data.totalRub,
                 }),
               });
               await loadOrders();

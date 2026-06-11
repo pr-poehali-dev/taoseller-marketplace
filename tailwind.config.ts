@@ -66,16 +66,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				tao: {
-					red: '#FF4D1A',
-					orange: '#FF9500',
-					gold: '#FFD60A',
-					green: '#30D158',
-					blue: '#0A84FF',
-					purple: '#BF5AF2',
-					dark: '#0D1117',
-					surface: '#161B22',
-					border: '#21262D',
+				brand: {
+					purple: '#7c5cbf',
+					'purple-light': '#a78de0',
+					'purple-bg': '#f0ebff',
+					pink: '#ec4899',
+					cyan: '#06b6d4',
+					amber: '#f59e0b',
+					surface: '#f8f9fc',
+					border: '#e8ecf4',
 				}
 			},
 			borderRadius: {

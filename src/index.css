@@ -4,55 +4,59 @@
 
 @layer base {
   :root {
-    --background: 220 20% 6%;
-    --foreground: 210 20% 95%;
+    --background: 0 0% 100%;
+    --foreground: 220 25% 10%;
 
-    --card: 220 18% 9%;
-    --card-foreground: 210 20% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
 
-    --popover: 220 18% 9%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
 
-    --primary: 15 100% 55%;
+    --primary: 252 80% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 14%;
-    --secondary-foreground: 210 20% 80%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 25% 10%;
 
-    --muted: 220 15% 12%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 38 100% 55%;
-    --accent-foreground: 220 20% 6%;
+    --accent: 252 80% 65%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 16%;
-    --input: 220 15% 14%;
-    --ring: 15 100% 55%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 252 80% 65%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --sidebar-background: 220 20% 6%;
-    --sidebar-foreground: 210 20% 80%;
-    --sidebar-primary: 15 100% 55%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 25% 10%;
+    --sidebar-primary: 252 80% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 12%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 220 15% 14%;
-    --sidebar-ring: 15 100% 55%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 25% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 252 80% 65%;
 
-    /* TaoSeller brand colors */
-    --tao-red: #ff4d1a;
-    --tao-orange: #ff9500;
-    --tao-gold: #ffd60a;
-    --tao-green: #30d158;
-    --tao-blue: #0a84ff;
-    --tao-purple: #bf5af2;
-    --tao-dark: #0d1117;
-    --tao-surface: #161b22;
-    --tao-border: #21262d;
+    /* TaoSeller light brand */
+    --brand-purple: #7c5cbf;
+    --brand-purple-light: #a78de0;
+    --brand-purple-bg: #f0ebff;
+    --brand-orange: #f97316;
+    --brand-pink: #ec4899;
+    --brand-cyan: #06b6d4;
+    --brand-amber: #f59e0b;
+    --brand-green: #22c55e;
+    --text-dark: #1a1a2e;
+    --text-body: #4a5568;
+    --text-muted: #94a3b8;
+    --surface: #f8f9fc;
+    --border-light: #e8ecf4;
   }
 }
 
@@ -62,25 +66,25 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-foreground;
     font-family: "Golos Text", sans-serif;
-    background: var(--tao-dark);
     overflow-x: hidden;
+    color: var(--text-dark);
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--tao-dark);
+    background: #f1f5f9;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--tao-border);
+    background: #cbd5e1;
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #30363d;
+    background: #94a3b8;
   }
 }
 
@@ -89,42 +93,59 @@
     font-family: "Oswald", sans-serif;
   }
 
-  .glow-red {
-    box-shadow:
-      0 0 20px rgba(255, 77, 26, 0.3),
-      0 0 40px rgba(255, 77, 26, 0.1);
+  /* ---- gradients ---- */
+  .gradient-brand {
+    background: linear-gradient(135deg, #7c5cbf, #a78de0);
   }
-  .glow-orange {
-    box-shadow:
-      0 0 20px rgba(255, 149, 0, 0.3),
-      0 0 40px rgba(255, 149, 0, 0.1);
+  .gradient-pink {
+    background: linear-gradient(135deg, #f472b6, #ec4899);
+  }
+  .gradient-purple {
+    background: linear-gradient(135deg, #818cf8, #7c5cbf);
+  }
+  .gradient-cyan {
+    background: linear-gradient(135deg, #22d3ee, #06b6d4);
+  }
+  .gradient-amber {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  }
+  .gradient-hero-bg {
+    background: radial-gradient(
+      ellipse 70% 80% at 65% 40%,
+      #ede9ff 0%,
+      #f5f3ff 40%,
+      #fff 100%
+    );
   }
 
-  .gradient-brand {
-    background: linear-gradient(135deg, var(--tao-red), var(--tao-orange));
-  }
   .gradient-brand-text {
-    background: linear-gradient(135deg, var(--tao-red), var(--tao-orange));
+    background: linear-gradient(135deg, #7c5cbf, #ec4899);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .glass {
-    background: rgba(22, 27, 34, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--tao-border);
+  /* ---- cards ---- */
+  .card-light {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
-
+  .card-light:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(124, 92, 191, 0.12);
+    border-color: rgba(124, 92, 191, 0.25);
+  }
   .card-hover {
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 77, 26, 0.3);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(124, 92, 191, 0.12);
   }
 
+  /* ---- nav ---- */
   .nav-item {
     transition: all 0.2s ease;
     position: relative;
@@ -137,7 +158,7 @@
     transform: translateY(-50%);
     width: 3px;
     height: 0;
-    background: var(--tao-red);
+    background: var(--brand-purple);
     border-radius: 0 2px 2px 0;
     transition: height 0.2s ease;
   }
@@ -145,10 +166,11 @@
     height: 70%;
   }
   .nav-item.active {
-    background: rgba(255, 77, 26, 0.08);
-    color: var(--tao-red);
+    background: var(--brand-purple-bg);
+    color: var(--brand-purple);
   }
 
+  /* ---- badges ---- */
   .pulse-dot {
     animation: pulse-dot 2s infinite;
   }
@@ -164,25 +186,15 @@
     }
   }
 
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.04),
-      transparent
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+  .tag-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 20px;
   }
 
+  /* ---- animations ---- */
   .slide-in {
     animation: slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
@@ -224,18 +236,55 @@
     }
   }
 
-  .tag-badge {
-    font-family: "Golos Text", sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 2px 8px;
-    border-radius: 20px;
+  .float-anim {
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
   }
 
   .stat-number {
     font-family: "Oswald", sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.02em;
+  }
+
+  /* btn */
+  .btn-primary {
+    background: var(--brand-purple);
+    color: #fff;
+    border-radius: 50px;
+    padding: 10px 28px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background: #6a4bab;
+    box-shadow: 0 6px 20px rgba(124, 92, 191, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--brand-purple);
+    border: 1.5px solid var(--brand-purple);
+    border-radius: 50px;
+    padding: 9px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .btn-outline:hover {
+    background: var(--brand-purple-bg);
   }
 }
