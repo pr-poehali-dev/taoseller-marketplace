@@ -58,9 +58,11 @@ export default function TaobaoPage() {
           </button>
           <div className="h-5 w-px bg-gray-200" />
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRAD }}>
-              <span className="text-white font-black text-xs">TB</span>
-            </div>
+            <img
+              src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/b73ece42-1e93-4ca9-a6dc-72bd1dd56b9d.png"
+              alt="TaoSeller logo"
+              className="w-8 h-8 object-contain"
+            />
             <span className="font-bold text-gray-900" style={{ fontFamily: "'Oswald', sans-serif" }}>Обзор Taobao</span>
           </div>
         </div>

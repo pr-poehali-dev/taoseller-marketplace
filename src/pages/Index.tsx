@@ -139,10 +139,9 @@ export default function Index() {
           {/* Logo */}
           <button onClick={() => handleNav("home")} className="flex items-center gap-1.5">
             <img
-              src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/3928216f-85fe-4a28-b430-43bc1fa45224.jpg"
-              alt="TaoSeller mascot"
-              className="w-11 h-11 object-contain"
-              style={{ mixBlendMode: "multiply" }}
+              src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/b73ece42-1e93-4ca9-a6dc-72bd1dd56b9d.png"
+              alt="TaoSeller logo"
+              className="w-10 h-10 object-contain"
             />
             <span className="text-xl tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#c2410c" }}>
               Tao<span style={{ color: "#f97316" }}>Seller</span>
@@ -355,9 +354,11 @@ export default function Index() {
                     className="absolute top-4 left-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2 shadow-lg float-anim"
                     style={{ animationDelay: "0s", border: `1px solid ${BDR}` }}
                   >
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#ff5000" }}>
-                      <span className="text-white font-black text-xs" style={{ fontFamily: "'Righteous', cursive" }}>TB</span>
-                    </div>
+                    <img
+                      src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/b73ece42-1e93-4ca9-a6dc-72bd1dd56b9d.png"
+                      alt="Taobao"
+                      className="w-7 h-7 object-contain flex-shrink-0"
+                    />
                     <span className="font-bold text-sm" style={{ color: "#ff5000", fontFamily: "'Righteous', cursive" }}>Taobao</span>
                   </div>
 
