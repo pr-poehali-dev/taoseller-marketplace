@@ -248,7 +248,40 @@ export default function TaobaoPage() {
       {/* CTA */}
       <section className="py-20 px-6" style={{ background: SURF }}>
         <div className="max-w-2xl mx-auto text-center">
-          <div className="text-5xl mb-4">🛍️</div>
+          <div className="flex items-center justify-center mb-6">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="80" height="80" rx="20" fill="url(#tbGrad)" />
+              {/* Fox ears */}
+              <path d="M18 28 L24 14 L32 26" fill="#fff" opacity="0.95"/>
+              <path d="M62 28 L56 14 L48 26" fill="#fff" opacity="0.95"/>
+              <path d="M20 27 L24 17 L30 26" fill="#ffb347" opacity="0.7"/>
+              <path d="M60 27 L56 17 L50 26" fill="#ffb347" opacity="0.7"/>
+              {/* Head */}
+              <ellipse cx="40" cy="44" rx="20" ry="18" fill="#fff"/>
+              {/* Eyes */}
+              <ellipse cx="32" cy="40" rx="4" ry="4.5" fill="#1a1a1a"/>
+              <ellipse cx="48" cy="40" rx="4" ry="4.5" fill="#1a1a1a"/>
+              <circle cx="33.5" cy="38.5" r="1.2" fill="#fff"/>
+              <circle cx="49.5" cy="38.5" r="1.2" fill="#fff"/>
+              {/* Nose */}
+              <ellipse cx="40" cy="47" rx="2.5" ry="1.8" fill="#ff6b35"/>
+              {/* Mouth */}
+              <path d="M36 50 Q40 54 44 50" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              {/* Cheeks */}
+              <ellipse cx="28" cy="46" rx="4" ry="2.5" fill="#ffb347" opacity="0.4"/>
+              <ellipse cx="52" cy="46" rx="4" ry="2.5" fill="#ffb347" opacity="0.4"/>
+              {/* Taobao T letter */}
+              <rect x="35" y="57" width="10" height="2" rx="1" fill="url(#tbGrad)"/>
+              <rect x="39" y="57" width="2" height="7" rx="1" fill="url(#tbGrad)"/>
+              <defs>
+                <linearGradient id="tbGrad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#ea580c"/>
+                  <stop offset="50%" stopColor="#f97316"/>
+                  <stop offset="100%" stopColor="#fb923c"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
           <h2 className="text-3xl font-black text-gray-900 mb-4" style={{ fontFamily: "'Oswald', sans-serif" }}>
             Готов заказать с Taobao?
           </h2>
