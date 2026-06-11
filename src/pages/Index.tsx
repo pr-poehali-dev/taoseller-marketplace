@@ -332,53 +332,56 @@ export default function Index() {
                   }}
                 />
 
-                {/* Central emoji */}
+                {/* Central visual */}
                 <div className="relative flex items-center justify-center" style={{ height: 320 }}>
+                  {/* Mascot center */}
                   <div
-                    className="w-52 h-52 rounded-full flex items-center justify-center text-8xl float-anim shadow-2xl"
-                    style={{ background: "linear-gradient(135deg,#ede9ff,#ddd6ff)", boxShadow: `0 20px 60px ${P}30` }}
+                    className="w-48 h-48 rounded-full flex items-center justify-center float-anim"
+                    style={{ background: "linear-gradient(135deg,#fff3e8,#ffe0c2)", boxShadow: `0 20px 60px ${P}25` }}
                   >
-                    🛍️
+                    <img
+                      src="https://cdn.poehali.dev/projects/2441c67b-4ef1-4873-b89c-6e523b912ef0/bucket/3928216f-85fe-4a28-b430-43bc1fa45224.jpg"
+                      alt="mascot"
+                      className="w-36 h-36 object-contain"
+                      style={{ mixBlendMode: "multiply" }}
+                    />
                   </div>
 
-                  {/* Floating card — students */}
+                  {/* Floating card — Taobao */}
                   <div
-                    className="absolute top-6 left-0 bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg float-anim"
-                    style={{ animationDelay: "0.5s", border: `1px solid ${BDR}` }}
+                    className="absolute top-4 left-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5 shadow-lg float-anim"
+                    style={{ animationDelay: "0s", border: `1px solid ${BDR}` }}
                   >
-                    <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center">
-                      <Icon name="Users" size={16} className="text-white" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-base leading-none" style={{ fontFamily: "'Oswald', sans-serif" }}>175K</div>
-                      <div className="text-xs text-gray-400">Клиентов</div>
-                    </div>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/TaoBao_logo.svg/200px-TaoBao_logo.svg.png" alt="Taobao" className="h-6 w-auto object-contain" />
                   </div>
 
-                  {/* Floating card — chart */}
+                  {/* Floating card — 1688 */}
                   <div
-                    className="absolute bottom-10 right-0 bg-white rounded-2xl px-4 py-3 shadow-lg float-anim w-44"
-                    style={{ animationDelay: "1s", border: `1px solid ${BDR}` }}
+                    className="absolute top-16 right-0 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5 shadow-lg float-anim"
+                    style={{ animationDelay: "0.4s", border: `1px solid ${BDR}` }}
                   >
-                    <div className="text-xs font-semibold text-gray-600 mb-2">Заказы за неделю</div>
-                    <div className="flex items-end gap-1 h-10">
-                      {[40, 65, 50, 80, 60, 90, 75].map((h, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-sm"
-                          style={{
-                            height: `${h}%`,
-                            background: i === 5 ? P : `${P}40`,
-                            borderRadius: 3,
-                          }}
-                        />
-                      ))}
-                    </div>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/1688.com_logo.svg/200px-1688.com_logo.svg.png" alt="1688" className="h-6 w-auto object-contain" />
+                  </div>
+
+                  {/* Floating card — Ozon */}
+                  <div
+                    className="absolute bottom-16 left-2 bg-white rounded-2xl px-3 py-2.5 flex items-center gap-2.5 shadow-lg float-anim"
+                    style={{ animationDelay: "0.8s", border: `1px solid ${BDR}` }}
+                  >
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ozon_logo.svg/200px-Ozon_logo.svg.png" alt="Ozon" className="h-5 w-auto object-contain" />
+                  </div>
+
+                  {/* Floating card — Wildberries */}
+                  <div
+                    className="absolute bottom-8 right-0 bg-white rounded-2xl px-3 py-2.5 flex items-center shadow-lg float-anim"
+                    style={{ animationDelay: "1.2s", border: `1px solid ${BDR}` }}
+                  >
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Wildberries_logo.svg/200px-Wildberries_logo.svg.png" alt="Wildberries" className="h-5 w-auto object-contain" />
                   </div>
 
                   {/* Decorative dots */}
-                  <div className="absolute top-4 right-8 w-5 h-5 rounded-full" style={{ background: P, opacity: 0.4 }} />
-                  <div className="absolute top-12 right-4 w-3 h-3 rounded-full" style={{ background: P, opacity: 0.25 }} />
+                  <div className="absolute top-4 right-10 w-4 h-4 rounded-full" style={{ background: P, opacity: 0.35 }} />
+                  <div className="absolute top-14 left-10 w-2.5 h-2.5 rounded-full" style={{ background: P, opacity: 0.2 }} />
                 </div>
               </div>
             </section>
