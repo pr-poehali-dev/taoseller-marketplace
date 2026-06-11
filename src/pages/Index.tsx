@@ -66,6 +66,7 @@ const PROD_STATUS = {
 };
 
 const P = "#f97316";
+const GRAD = "linear-gradient(135deg, #ea580c, #f97316, #fb923c)";
 const SURF = "#fff8f4";
 const BDR = "#fde8d8";
 
@@ -157,7 +158,7 @@ export default function Index() {
                     ? "text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 }`}
-                style={section === n.id ? { background: P } : {}}
+                style={section === n.id ? { background: GRAD } : {}}
               >
                 {n.label}
               </button>
@@ -176,7 +177,7 @@ export default function Index() {
                 {notifCount > 0 && (
                   <span
                     className="absolute top-1 right-1 w-4 h-4 rounded-full text-white flex items-center justify-center text-[9px] font-bold pulse-dot"
-                    style={{ background: P }}
+                    style={{ background: GRAD }}
                   >
                     {notifCount}
                   </span>
@@ -220,7 +221,7 @@ export default function Index() {
               className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                 section === "profile" ? "text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"
               }`}
-              style={section === "profile" ? { background: P } : { border: `1.5px solid ${BDR}` }}
+              style={section === "profile" ? { background: GRAD } : { border: `1.5px solid ${BDR}` }}
             >
               <div className="w-6 h-6 rounded-full gradient-brand flex items-center justify-center text-white text-xs font-bold">Ю</div>
               Профиль
@@ -230,7 +231,7 @@ export default function Index() {
             <button
               onClick={() => setShowForm(true)}
               className="hidden md:flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold text-white shadow-sm hover:opacity-90 transition-all"
-              style={{ background: P }}
+              style={{ background: GRAD }}
             >
               Заказать
             </button>
@@ -251,12 +252,12 @@ export default function Index() {
             {navLinks.map((n) => (
               <button key={n.id} onClick={() => handleNav(n.id)}
                 className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${section === n.id ? "text-white" : "text-gray-600 hover:bg-gray-100"}`}
-                style={section === n.id ? { background: P } : {}}
+                style={section === n.id ? { background: GRAD } : {}}
               >{n.label}</button>
             ))}
             <button onClick={() => { setShowForm(true); setMobileMenu(false); }}
               className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white mt-2"
-              style={{ background: P }}
+              style={{ background: GRAD }}
             >Заказать с Таобао</button>
           </div>
         )}
@@ -514,7 +515,7 @@ export default function Index() {
                 {categories.map((cat) => (
                   <button key={cat} onClick={() => setCatFilter(cat)}
                     className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${catFilter === cat ? "text-white shadow-sm" : "text-gray-500 hover:text-gray-800 bg-gray-100"}`}
-                    style={catFilter === cat ? { background: P } : {}}
+                    style={catFilter === cat ? { background: GRAD } : {}}
                   >{cat}</button>
                 ))}
               </div>
@@ -568,7 +569,7 @@ export default function Index() {
                 return (
                   <button key={s} onClick={() => setOrderFilter(s)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all ${isActive ? "text-white shadow-sm" : "text-gray-500 hover:text-gray-700 bg-gray-100"}`}
-                    style={isActive ? { background: P } : {}}
+                    style={isActive ? { background: GRAD } : {}}
                   >
                     {label}
                     <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? "bg-white/25 text-white" : "bg-white text-gray-500"}`}>{count}</span>

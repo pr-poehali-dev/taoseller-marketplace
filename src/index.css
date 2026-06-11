@@ -45,6 +45,7 @@
 
     /* TaoSeller light brand */
     --brand-purple: #f97316;
+    --brand-gradient: linear-gradient(135deg, #ea580c, #f97316, #fb923c);
     --brand-purple-light: #fb923c;
     --brand-purple-bg: #fff7ed;
     --brand-orange: #ea580c;
@@ -95,7 +96,7 @@
 
   /* ---- gradients ---- */
   .gradient-brand {
-    background: linear-gradient(135deg, #f97316, #fb923c);
+    background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
   }
   .gradient-pink {
     background: linear-gradient(135deg, #f472b6, #ec4899);
@@ -119,7 +120,7 @@
   }
 
   .gradient-brand-text {
-    background: linear-gradient(135deg, #ea580c, #f97316);
+    background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fbbf24 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -257,7 +258,7 @@
 
   /* btn */
   .btn-primary {
-    background: var(--brand-purple);
+    background: linear-gradient(135deg, #ea580c, #f97316, #fb923c);
     color: #fff;
     border-radius: 50px;
     padding: 10px 28px;
