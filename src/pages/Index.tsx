@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import OrderForm, { type OrderFormData } from "@/components/OrderForm";
 
 type Page = "home" | "catalog" | "orders" | "storage" | "profile" | "help";
 
@@ -56,6 +57,7 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -379,13 +381,13 @@ export default function Index() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { label: "Добавить товар", icon: "PlusCircle", color: "#FF4D1A", page: "catalog" as Page },
-                    { label: "Новый заказ", icon: "ShoppingCart", color: "#FF9500", page: "orders" as Page },
+                    { label: "Заказ с Таобао", icon: "ShoppingCart", color: "#FF9500", page: "orders" as Page },
                     { label: "Управление складом", icon: "Warehouse", color: "#0A84FF", page: "storage" as Page },
                     { label: "Написать в поддержку", icon: "HeadphonesIcon", color: "#30D158", page: "help" as Page },
                   ].map((a, i) => (
                     <button
                       key={i}
-                      onClick={() => setPage(a.page)}
+                      onClick={() => i === 1 ? setShowOrderForm(true) : setPage(a.page)}
                       className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/5 transition-all group"
                       style={{ border: "1px solid var(--tao-border)" }}
                     >
@@ -513,14 +515,23 @@ export default function Index() {
                     </button>
                   );
                 })}
-                <button
-                  onClick={() => showToast("Экспорт заказов — скоро!")}
-                  className="ml-auto flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-all"
-                  style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
-                >
-                  <Icon name="Download" size={13} />
-                  Экспорт
-                </button>
+                <div className="ml-auto flex items-center gap-2">
+                  <button
+                    onClick={() => showToast("Экспорт заказов — скоро!")}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white transition-all"
+                    style={{ background: "var(--tao-dark)", border: "1px solid var(--tao-border)" }}
+                  >
+                    <Icon name="Download" size={13} />
+                    Экспорт
+                  </button>
+                  <button
+                    onClick={() => setShowOrderForm(true)}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium text-white gradient-brand hover:opacity-90 transition-opacity"
+                  >
+                    <Icon name="Plus" size={13} />
+                    Заказ с Таобао
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-xl overflow-hidden" style={{ background: "var(--tao-surface)", border: "1px solid var(--tao-border)" }}>
@@ -873,6 +884,27 @@ export default function Index() {
       {/* Overlay for notifications */}
       {showNotifications && (
         <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+      )}
+
+      {/* Order Form Modal */}
+      {showOrderForm && (
+        <OrderForm
+          onClose={() => setShowOrderForm(false)}
+          onSubmit={(data: OrderFormData) => {
+            const newOrder = {
+              id: `TAO-${8823 + Math.floor(Math.random() * 100)}`,
+              buyer: data.name,
+              items: data.quantity,
+              total: `¥ ${data.quantity * 120}`,
+              status: "new" as const,
+              date: new Date().toLocaleDateString("ru", { day: "numeric", month: "short", year: "numeric" }),
+              address: data.address,
+            };
+            MOCK_ORDERS.unshift(newOrder);
+            setShowOrderForm(false);
+            showToast(`Заказ от ${data.name} оформлен!`);
+          }}
+        />
       )}
     </div>
   );
