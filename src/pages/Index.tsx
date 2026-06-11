@@ -141,8 +141,8 @@ export default function Index() {
               className="w-11 h-11 object-contain"
               style={{ mixBlendMode: "multiply" }}
             />
-            <span className="font-bold text-gray-900 text-xl" style={{ fontFamily: "'Oswald', sans-serif" }}>
-              TaoSeller<span style={{ color: P }}>.</span>
+            <span className="text-xl tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#1a1a2e" }}>
+              Tao<span style={{ color: P }}>Seller</span>
             </span>
           </button>
 
@@ -764,7 +764,7 @@ export default function Index() {
               className="w-9 h-9 object-contain"
               style={{ mixBlendMode: "multiply" }}
             />
-            <span className="font-bold text-gray-700" style={{ fontFamily: "'Oswald', sans-serif" }}>TaoSeller.</span>
+            <span className="tracking-wide" style={{ fontFamily: "'Righteous', cursive", color: "#1a1a2e" }}>Tao<span style={{ color: P }}>Seller</span></span>
           </div>
           <div className="flex items-center gap-6">
             {navLinks.map((n) => (
