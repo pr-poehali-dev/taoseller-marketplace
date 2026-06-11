@@ -281,9 +281,7 @@ export default function Index() {
                   из Китая
                   <span className="block" style={{ color: P }}>быстро и выгодно</span>
                 </h1>
-                <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-md">
-                  Помогаем покупать с Таобао, Tmall и 1688 с доставкой в Россию. Расчёт стоимости, отслеживание заказов и управление складом в одном месте.
-                </p>
+                <p className="text-gray-500 text-base leading-relaxed mb-8 max-w-md">Помогаем покупать с Таобао, Tmall и 1688 с доставкой в Россию. </p>
 
                 {/* Actions */}
                 <div className="flex flex-wrap items-center gap-4 mb-10">
