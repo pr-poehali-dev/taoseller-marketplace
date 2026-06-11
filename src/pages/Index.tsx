@@ -381,7 +381,7 @@ export default function Index() {
             </section>
 
             {/* CATEGORIES */}
-            <section className="max-w-6xl mx-auto px-6 pb-16">
+            <section className="max-w-6xl mx-auto px-6 pb-16 -mt-8">
               <div className="mb-7">
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
